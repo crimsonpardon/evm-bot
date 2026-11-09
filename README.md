@@ -1,33 +1,118 @@
-# EVM Bot V2 — Developed by mowaz_official
+<div align="center">
 
-Discord bot with invite tracking, SQLite claim records, plan dropdown, and optional LXD container provisioning with randomly selected shared-host ports that retry when the host port is already in use. Ubuntu image default is **`ubuntu:24.04`**. All commands work as **slash (`/`)** and **prefix (`*`)** commands.
+# ⚡ EVM Bot V2
 
-## One-command dependency installation (Ubuntu/Debian)
+**Invite-based VPS Discord bot — LXD containers, SSH in seconds, slash + prefix commands.**
 
-Unzip the project, enter its folder, then run:
+![Python](https://img.shields.io/badge/PYTHON-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![discord.py](https://img.shields.io/badge/DISCORD.PY-5865F2?style=for-the-badge&logo=discord&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/UBUNTU_24.04-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLITE-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![Commands](https://img.shields.io/badge/COMMANDS-41-0B8FD4?style=for-the-badge)
+![Prefix](https://img.shields.io/badge/PREFIX-*-0B8FD4?style=for-the-badge)
+
+</div>
+
+---
+
+## 💫 About Bot:
+
+Invite people → they earn credits → they claim a VPS plan → the bot builds an Ubuntu 24.04 LXD container and DMs the SSH login.
+
+- 🎟️ Invite tracking with leaderboard
+- 🖥️ One-click VPS claim with plan dropdown
+- 🔐 SSH over Pinggy tunnel, credentials sent by DM only
+- 🌐 SSHX browser terminal
+- 🛠️ Admin tools: create, delete, suspend, unsuspend, expiry
+- ⚡ **Every command works as `/slash` and `*prefix`**
+- 🎨 Blue `About` and `Help` menus with live statistics
+
+---
+
+## 🚀 Quick Start:
 
 ```bash
-cd EVM-Bot-V2
+git clone https://github.com/crimsonpardon/evm-bot.git
+cd evm-bot
 sudo bash install.sh
 ```
 
-The script installs Python/venv/pip/system dependencies, creates `.venv`, installs `requirements.txt`, creates `.env` if absent, and checks Python syntax. It does **not** start the bot or enable VPS provisioning automatically.
-
-## Configure and start
+Then configure and run:
 
 ```bash
 nano .env
-```
-
-Set `DISCORD_TOKEN` and `OWNER_ID`. Keep `ENABLE_LXD_PROVISIONING=false` until LXD storage quotas, networking, public IP routing, and firewall rules are tested. Then start:
-
-```bash
 .venv/bin/python bot.py
 ```
 
-## LXD image
+Set `DISCORD_TOKEN` and `OWNER_ID` in `.env`. Keep `ENABLE_LXD_PROVISIONING=false` until LXD storage quotas, networking and firewall are tested.
 
-The configured image is `ubuntu:24.04`. Verify it on the host:
+**Run in background (optional):**
+
+```bash
+nohup .venv/bin/python bot.py > bot.log 2>&1 &
+```
+
+**Update later:**
+
+```bash
+cd evm-bot && git pull && .venv/bin/pip install -r requirements.txt
+```
+
+---
+
+## ⚙️ Discord Setup:
+
+In the Discord Developer Portal enable:
+
+- ✅ **Message Content Intent**
+- ✅ **Server Members Intent**
+
+Invite the bot with the `bot` and `applications.commands` scopes. For invite tracking it needs **Manage Server**.
+
+---
+
+## 📚 Commands:
+
+Use `/command` or `*command`. Open the menu with `*help`.
+
+| Category | Commands |
+|---|---|
+| 🏠 General | `home` `help` `quickhelp` `ping` `about` `faq` `info` `invite` `developer` `setprefix` |
+| 🖥️ VPS | `vps create` `vps info` `manage` `ssh` `console` `web` `password` `pin` `upgrade` `changeos` `share` `unshare` |
+| 🎟️ Invites | `invites` `invites top` `invited` `inviter` `claim` `plans` `addinvite` |
+| 📈 Monitoring | `dashboard` `live` `top` `graph` `status` `serverstats` `vps-stats` `vpsusage` |
+| 🔢 Ports | `ports list` `ports add` `ports remove` |
+| 🐋 Nodes | `node` |
+| 🛠️ Admin | `setplan` `delplan` `claimstatus` `vpsadmin` |
+
+### 🛠️ VPS management
+
+- `*manage` — list your VPS
+- `*manage 7` — DM connection details
+- `*manage 7 start | stop | restart` — power controls
+- `*manage 7 sshx` — private browser terminal link by DM
+- `*manage 7 reinstall CONFIRM` — ⚠️ wipes the container and rebuilds it
+
+### 👑 Admin VPS commands
+
+- `*vpsadmin create @member PLAN [days]` — expiry defaults to 30 days, `0` = never
+- `*vpsadmin delete <claim_id>`
+- `*vpsadmin suspend <claim_id>` / `unsuspend <claim_id>`
+- `*vpsadmin expiry <claim_id> <days>`
+
+---
+
+## 🔌 How SSH Works:
+
+Containers are published through a **Pinggy TCP tunnel**, so no public IPv4 is needed. The login DM contains the hostname, port, username, password and a ready-to-paste Termux command.
+
+- Needs the OpenSSH client on the host and outbound access to `free.pinggy.io:443`
+- Free tunnels can change or expire — keep the bot running
+- Pinggy publishes SSH only, not game ports
+
+---
+
+## 🧪 LXD Image:
 
 ```bash
 lxc image list ubuntu:
@@ -35,93 +120,64 @@ lxc launch ubuntu:24.04 evm-test
 lxc exec evm-test -- cat /etc/os-release
 ```
 
-If the test container already exists, choose a different name or remove it only if you no longer need it.
+---
 
-## Discord setup
-
-In Discord Developer Portal, enable **Message Content Intent** and **Server Members Intent**. For invite tracking, the bot needs permission to inspect server invites (Manage Server). Use the minimum permissions required for your server.
-
-## Commands (slash + prefix)
-
-Every command works two ways: as a slash command (`/ping`) and with the prefix **`*`** (`*ping`). Nothing was renamed or removed — `*home`, `*help`, `*ping`, `*plans`, `*invites`, `*vps create`, `*claim`, `*ports list`, `*manage`, `*vpsadmin ...` and the rest all behave as before. Slash commands are synced automatically when the bot starts (global sync can take a few minutes to appear the first time).
-
-The default prefix is `*` (`BOT_PREFIX=*` in `.env`). Databases created by the old build that still stored `$` are switched to `*` once automatically; `*setprefix <prefix>` still works if you ever want a different one.
-
-## Menus
-
-- `*about` / `/about` — blue card with Developer (mowaz_official), Version, live Users / Servers / Commands counts, gradient footer image. Uses Discord Components V2 (needs discord.py 2.6+); falls back to a blue embed automatically if unavailable.
-- `*help` / `/help` — blue embed with the gradient footer image and the category dropdown (`*help <keyword>` searches).
-- `assets/footer.png` is the footer image; it is recreated automatically if deleted. Replace it with your own PNG (same file name) to change the look.
-
-## Provisioning limitations and safety
+## ⚠️ Safety Notes:
 
 - LXD creates **containers**, not full KVM virtual machines.
-- The host must have LXD installed and initialized; the `lxc` command must work as the same Linux user running the bot.
-- `Pinggy TCP tunnel` must be an IPv4 address actually assigned/routed to the host. A private address such as `10.x.x.x` is not a public endpoint.
-- Provider/network firewall must allow the selected TCP port range and upstream NAT must forward it if applicable.
-- The container gets port forwarding to TCP 22 and 25565, but this bot does not install or configure SSH/Minecraft services inside the container. Those services must be installed separately.
-- Do not set `ENABLE_LXD_PROVISIONING=true` until you have verified the above. Use only infrastructure you own or are authorized to administer.
+- The `lxc` command must work for the same Linux user that runs the bot.
+- Passwords are stored in SQLite so they can be re-sent — protect `evm_bot.db` and `.env`.
+- SSHX links grant a root terminal. Never share them.
+- Use only infrastructure you own or are allowed to administer.
 
-## VPS management + private credentials
+---
 
-After successful provisioning, the bot attempts to DM the owner the SSH endpoint, username, generated password, container IPv4, and game port. If DMs are closed, open DMs from server members and use `!manage <claim_id>` (with your configured prefix) to request details by DM.
+## 🌐 Socials:
 
-Commands (default prefix `*`):
-- `*manage` — list your claims
-- `*manage 7` — DM connection details
-- `*manage 7 password` — DM connection details again
-- `*manage 7 start`, `*manage 7 stop`, `*manage 7 restart` — lifecycle actions
-- `*manage 7 reinstall CONFIRM` — destructive reinstall; deletes container data and creates a fresh Ubuntu 24.04 container with new credentials
+![Discord](https://img.shields.io/badge/DISCORD-5865F2?style=for-the-badge&logo=discord&logoColor=white)
+![Instagram](https://img.shields.io/badge/INSTAGRAM-E4405F?style=for-the-badge&logo=instagram&logoColor=white)
+![YouTube](https://img.shields.io/badge/YOUTUBE-FF0000?style=for-the-badge&logo=youtube&logoColor=white)
+![Email](https://img.shields.io/badge/EMAIL-D14836?style=for-the-badge&logo=gmail&logoColor=white)
 
-Only the VPS owner (or server admin / configured bot owner) can manage a claim. Keep the database and `.env` private: the generated login password is stored in SQLite so it can be re-sent by DM. For production, protect the database file and host backups.
+---
 
+## 💻 Tech Stack:
 
-## Password-based SSH login (Ubuntu 24.04)
+![Python](https://img.shields.io/badge/PYTHON-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Shell](https://img.shields.io/badge/SHELL-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLITE-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![LXD](https://img.shields.io/badge/LXD-333333?style=for-the-badge&logo=linuxcontainers&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/UBUNTU-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
 
-New deployments configure the `evmuser` account with a generated password and enable SSH password authentication using `/etc/ssh/sshd_config.d/99-evm-password-auth.conf`. The bot sends the endpoint, username, and generated password by Discord DM after successful provisioning. The bot does not create or require an SSH private key.
+---
 
-For an SSH client that only offers “Import/Add key”, switch its connection/authentication method to **Password** (or use a password-capable SSH client). A key-only client cannot accept a password merely because the server supports password authentication.
+## 📊 GitHub Stats:
 
-The configured public IP and allocated TCP port must be reachable through the VPS provider's firewall/NAT. Password authentication over the public internet has security trade-offs; use a strong generated password and change it after first login.
+<div align="center">
 
+<img src="https://github-readme-stats.vercel.app/api?username=crimsonpardon&show_icons=true&theme=dark&hide_border=true" alt="GitHub Stats" height="170" />
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=crimsonpardon&layout=compact&theme=dark&hide_border=true" alt="Top Languages" height="170" />
 
-## Random ports and public IP notes
+<img src="https://streak-stats.demolab.com/?user=crimsonpardon&theme=dark&hide_border=true" alt="Streak" />
 
-Each successful deployment chooses random, distinct SSH/game ports from `PORT_RANGE_START`–`PORT_RANGE_END`, checks actual LXD proxy binding by attempting to add the proxy devices, and retries other candidates when a port is already bound. If no two ports can be bound, deployment fails cleanly and the container is removed. The public IPv4 is **not randomly invented**: set `Pinggy TCP tunnel` to the real public/routed address of your host. If you have only one public IPv4, deployments share that IP and get different ports. A private host address (10.x/172.16–31.x/192.168.x) is not directly reachable from the public internet unless the provider forwards/routes it.
+</div>
 
+---
 
-## SSHX browser terminal
+## 🏆 GitHub Trophies:
 
-For a VPS that you own, run ` *manage <claim_id> sshx ` in the Discord server.
-The bot installs SSHX inside that container (if needed), starts a terminal as the
-unprivileged `evmuser`, and DMs the detected session URL to the VPS owner.
+<div align="center">
 
-**Security:** anyone who obtains an SSHX session URL may be able to use the shared
-terminal. Keep the URL private and stop the SSHX process when finished. The bot
-does not post the link in a public channel. This feature requires outbound internet
-access from the container and successful SSHX service connectivity.
+<img src="https://github-profile-trophy.vercel.app/?username=crimsonpardon&theme=onedark&no-frame=true&column=7" alt="Trophies" />
 
+</div>
 
-SSH login for new deployments is configured as `root` with a generated password. SSHX runs as root in `/root`; keep its session URL private because it grants root-level terminal access.
+---
 
+<div align="center">
 
-## Login DM format and networking
-The login DM uses a RazorCloud-inspired field layout (server IP, SSH port, username, SSH command, password, game address, OS and claim ID). Values are populated from this bot's own configured `Pinggy TCP tunnel` and allocated LXD proxy ports. Do not copy another provider's IP, ports, or credentials: those belong to their infrastructure. Configure `Pinggy TCP tunnel` to an address assigned/routed to your own host, and ensure the provider firewall allows the selected port range.
+**Developed by mowaz_official** • Made with ❤️ for Discord hosting communities
 
+![Views](https://komarev.com/ghpvc/?username=crimsonpardon&label=Profile%20views&color=0B8FD4&style=flat)
 
-### Pinggy SSH tunnel
-This build uses a Pinggy TCP reverse tunnel for SSH and no longer requires `PUBLIC_IPV4`. The bot host must have the OpenSSH client installed and outbound access to `free.pinggy.io:443`. Free Pinggy endpoints may change and free tunnels may expire; keep the bot process running. The DM includes the hostname, allocated port, and a Termux command. This mode publishes SSH only; it does not publish Minecraft/game ports.
-
-
-## Admin VPS lifecycle commands
-
-Admins (or the configured bot owner) can manage VPS instances with the configured prefix (default `$`):
-
-- `*vpsadmin help`
-- `*vpsadmin create @member PLAN [days]` — provision a VPS for any server member without invite requirements; expiry defaults to 30 days, use `0` for no expiry.
-- `*vpsadmin delete <claim_id>` — delete the container and its saved credentials/mapping.
-- `*vpsadmin suspend <claim_id>` — stop the container.
-- `*vpsadmin unsuspend <claim_id>` — start the container again.
-- `*vpsadmin expiry <claim_id> <days>` — set expiry from now; `0` removes expiry.
-
-Expired VPS containers are stopped automatically by the bot's periodic expiry worker. Deletion permanently removes the container data. Test on a non-production VPS first. Free Pinggy tunnels may expire independently and may not provide a stable 24/7 endpoint.
+</div>
